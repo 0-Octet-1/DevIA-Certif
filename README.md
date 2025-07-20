@@ -1,12 +1,14 @@
-# 🏗️ Projet de Certification - Évaluation de l'Accessibilité PMR
+# Projet de Certification - Évaluation de l'Accessibilité PMR
 
 <div align="center">
   <img src="https://img.shields.io/badge/Python-3.8+-blue.svg" alt="Python 3.8+">
   <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License MIT">
   <img src="https://img.shields.io/badge/Status-Terminé-success" alt="Status">
+  
+  <img src="Intro-Soutenance.png" alt="Présentation du projet" style="max-width: 100%; margin: 20px 0;">
 </div>
 
-## 📋 Description
+## Description
 
 Ce projet a été développé dans le cadre de la certification RNCP 38616 Développeur IA. Il propose une solution complète pour évaluer l'accessibilité des établissements recevant du public (ERP) pour les personnes à mobilité réduite (PMR) en combinant différentes techniques d'IA :
 
@@ -14,14 +16,14 @@ Ce projet a été développé dans le cadre de la certification RNCP 38616 Déve
 - **Deep Learning** avec YOLOv8 pour la détection d'éléments d'accessibilité sur images
 - **API REST** pour le déploiement des modèles
 
-## 🎯 Objectifs
+## Objectifs
 
 - Automatiser l'évaluation de l'accessibilité PMR des ERP
 - Fournir des rapports détaillés sur les critères d'accessibilité
 - Proposer des recommandations d'amélioration
 - Créer une interface utilisateur intuitive pour les évaluateurs
 
-## 🗂️ Structure du Projet
+## Structure du Projet
 
 ```
 .
@@ -45,7 +47,7 @@ Ce projet a été développé dans le cadre de la certification RNCP 38616 Déve
 └── SourceData/                       # Données brutes initiales
 ```
 
-## 🛠️ Prérequis Techniques
+## Prérequis Techniques
 
 ### Configuration minimale recommandée
 - **Système d'exploitation** : Windows 10/11, macOS 10.15+, ou Linux
@@ -113,7 +115,7 @@ pip install -r 7-Deploiement/requirements.txt
 
 > **Note** : Pour l'entraînement sur GPU, assurez-vous d'avoir installé les bons drivers et CUDA Toolkit.
 
-## 🚀 Guide d'Utilisation
+## Guide d'Utilisation
 
 ### 1. Exploration des Données avec Streamlit
 
@@ -237,13 +239,16 @@ python app_yolov8.py
 
 **Arrêt** : Appuyez sur `Ctrl+C` dans le terminal
 
-## 📊 Données et Modèles
+## Données et Modèles
 
 ### Jeu de Données
-- **Source** : Données AccessLibre enrichies
+- **Source** :2 sources différentes de données ont été utilisées :
+- **Data Gouv** - AccesLibre - https://www.data.gouv.fr/dataservices/api-acces-libre/
+- **Zenodo** - Images - https://zenodo.org/records/6382090
+
 - **Taille** : 592 897 établissements (données tabulaires)
 - **Images** : 3 367 images annotées pour YOLOv8
-- **Licence** : [À préciser]
+
 
 ### Modèles Entraînés
 
@@ -257,13 +262,12 @@ python app_yolov8.py
 
 ### Structure du Code
 - **Organisation** : Modulaire avec séparation claire des préoccupations
-- **Documentation** : Docstrings et commentaires en français
-- **Tests** : [À compléter avec les tests unitaires]
+- **Documentation** : Docstrings et commentaires en français - anglais
 
 ### Bonnes Pratiques
 - Utilisation de Git pour le contrôle de version
 - Environnements virtuels pour l'isolation des dépendances
-- Documentation complète du code et des processus
+
 
 ## 📝 Licence
 
