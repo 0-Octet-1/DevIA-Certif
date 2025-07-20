@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyse de l'accessibilité pour les personnes à mobilité réduite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #40505f;
+            color: #2c3e50;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .landing-container {
+            background: white;
+            border-radius: 12px;
+            padding: 50px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            max-width: 500px;
+            width: 90%;
+            border: 1px solid #e9ecef;
+        }
+        
+        .pmr-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 25px;
+            background: #3498db;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+        }
+        
+        .project-title {
+            font-size: 24px;
+            font-weight: 300;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+        
+        .project-subtitle {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-weight: 400;
+        }
+        
+        .author-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 3px solid #3498db;
+        }
+        
+        .author-name {
+            font-size: 16px;
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 6px;
+        }
+        
+        .formation-info {
+            font-size: 13px;
+            color: #7f8c8d;
+            line-height: 1.4;
+        }
+        
+        .enter-button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .enter-button:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+        
+        .tech-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            color: #7f8c8d;
+            font-weight: 500;
+            border: 1px solid #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <div class="tech-badge">
+        Developpeur IA
+    </div>
+    
+    <div class="landing-container">
+        <div class="pmr-icon">
+            ♿
+        </div>
+        
+        <h1 class="project-title">
+            Analyse et prédiction de l'accessibilité<br>
+            pour les personnes à mobilité réduite via l'IA
+        </h1>
+        
+        <p class="project-subtitle">
+            Projet fin de formation Alyra Berners-Lee<br>
+            Developpeur IA<br>2025
+        </p>
+        
+        <div class="author-info">
+            <div class="author-name">Gregory Le Terte</div>
+            <div class="formation-info">
+                Projet fin de formation Alyra Berners-Lee<br>
+                Developpeur IA - 2025
+            </div>
+        </div>
+        
+        <a href="/soutenance" class="enter-button">
+            Entrer
+        </a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,8 @@
+# configuration dataset yolov8
+path: E:\alyra\Projet\Certif\6-DL-VisionComputer\data\yolo_format
+train: images/train
+val: images/val
+
+# classes
+nc: 5
+names: ['step', 'stair', 'ramp', 'handrail', 'grab_bar']

@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>detection accessibilite pmr - yolo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'segoe ui', tahoma, geneva, verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .upload-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #3498db;
+            border-radius: 10px;
+            padding: 40px;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            border-color: #2980b9;
+            background: #f8f9fa;
+        }
+        
+        .upload-area.dragover {
+            border-color: #27ae60;
+            background: #d5f4e6;
+        }
+        
+        .upload-icon {
+            font-size: 3em;
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .result-image {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .accessibility-score {
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .accessible {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+        }
+        
+        .not-accessible {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+        }
+        
+        .detections {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .detection-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .recommendations {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .info-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        
+        .info-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .classes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .class-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid;
+        }
+        
+        .class-step { border-color: #e74c3c; }
+        .class-stair { border-color: #27ae60; }
+        .class-grab-bar { border-color: #3498db; }
+        .class-ramp { border-color: #f39c12; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>detection accessibilite pmr</h1>
+            <p>analyse automatique d'images avec intelligence artificielle yolo</p>
+        </div>
+        
+        <div class="content">
+            <div class="upload-section">
+                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-icon">📷</div>
+                    <h3>cliquez pour selectionner une image</h3>
+                    <p>ou glissez-deposez votre image ici</p>
+                    <p style="font-size: 0.9em; color: #7f8c8d; margin-top: 10px;">
+                        formats supportes: jpg, png, gif
+                    </p>
+                </div>
+                
+                <input type="file" id="fileInput" class="file-input" accept="image/*">
+                <button id="analyzeBtn" class="btn" disabled>analyser l'image</button>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>analyse en cours avec le modele yolo...</p>
+            </div>
+            
+            <div class="results" id="results">
+                <h3>resultats de l'analyse</h3>
+                
+                <img id="resultImage" class="result-image" alt="image analysee">
+                
+                <div id="accessibilityScore" class="accessibility-score">
+                    <h3 id="scoreTitle">score accessibilite</h3>
+                    <p id="scoreText"></p>
+                </div>
+                
+                <div class="detections" id="detections">
+                    <h4>objets detectes</h4>
+                    <div id="detectionsList"></div>
+                </div>
+                
+                <div class="recommendations" id="recommendations">
+                    <h4>recommandations</h4>
+                    <ul id="recommendationsList"></ul>
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <h3>classes detectees par le modele</h3>
+                <div class="classes-grid">
+                    <div class="class-item class-step">
+                        <strong>step</strong><br>
+                        <small>marches</small>
+                    </div>
+                    <div class="class-item class-stair">
+                        <strong>stair</strong><br>
+                        <small>escaliers</small>
+                    </div>
+                    <div class="class-item class-grab-bar">
+                        <strong>grab_bar</strong><br>
+                        <small>barres d'appui</small>
+                    </div>
+                    <div class="class-item class-ramp">
+                        <strong>ramp</strong><br>
+                        <small>rampes</small>
+                    </div>
+                </div>
+                
+                <p style="margin-top: 20px; font-size: 0.9em; color: #7f8c8d;">
+                    <strong>certification rncp 38616</strong> - bloc 6 vision par ordinateur<br>
+                    modele yolo entraine sur gpu amd avec directml
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const uploadArea = document.querySelector('.upload-area');
+        
+        let selectedFile = null;
+        
+        // gestion selection fichier
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                selectedFile = e.target.files[0];
+                analyzeBtn.disabled = false;
+                uploadArea.innerHTML = `
+                    <div class="upload-icon">✅</div>
+                    <h3>image selectionnee: ${selectedFile.name}</h3>
+                    <p>cliquez sur "analyser" pour commencer</p>
+                `;
+            }
+        });
+        
+        // drag and drop
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                selectedFile = files[0];
+                fileInput.files = files;
+                analyzeBtn.disabled = false;
+                uploadArea.innerHTML = `
+                    <div class="upload-icon">✅</div>
+                    <h3>image selectionnee: ${selectedFile.name}</h3>
+                    <p>cliquez sur "analyser" pour commencer</p>
+                `;
+            }
+        });
+        
+        // analyse image
+        analyzeBtn.addEventListener('click', async function() {
+            if (!selectedFile) return;
+            
+            // afficher loading
+            loading.style.display = 'block';
+            results.style.display = 'none';
+            analyzeBtn.disabled = true;
+            
+            try {
+                // preparation formdata
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                
+                // requete api
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`erreur api: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // afficher resultats
+                displayResults(data);
+                
+            } catch (error) {
+                console.error('erreur:', error);
+                alert(`erreur lors de l'analyse: ${error.message}`);
+            } finally {
+                loading.style.display = 'none';
+                analyzeBtn.disabled = false;
+            }
+        });
+        
+        function displayResults(data) {
+            // image resultat
+            document.getElementById('resultImage').src = data.image_result;
+            
+            // score accessibilite
+            const scoreDiv = document.getElementById('accessibilityScore');
+            const scoreTitle = document.getElementById('scoreTitle');
+            const scoreText = document.getElementById('scoreText');
+            
+            const accessibility = data.accessibility;
+            const score = Math.round(accessibility.score * 100);
+            
+            if (accessibility.accessible) {
+                scoreDiv.className = 'accessibility-score accessible';
+                scoreTitle.textContent = `✅ accessible (${score}%)`;
+            } else {
+                scoreDiv.className = 'accessibility-score not-accessible';
+                scoreTitle.textContent = `❌ non accessible (${score}%)`;
+            }
+            
+            scoreText.textContent = `score d'accessibilite: ${score}/100`;
+            
+            // detections
+            const detectionsList = document.getElementById('detectionsList');
+            detectionsList.innerHTML = '';
+            
+            if (data.detections.length === 0) {
+                detectionsList.innerHTML = '<p>aucun objet detecte</p>';
+            } else {
+                data.detections.forEach(detection => {
+                    const item = document.createElement('div');
+                    item.className = 'detection-item';
+                    item.innerHTML = `
+                        <strong>${detection.label}</strong> 
+                        (confiance: ${Math.round(detection.confidence * 100)}%)
+                        <br><small>${detection.accessibility_impact || ''}</small>
+                    `;
+                    detectionsList.appendChild(item);
+                });
+            }
+            
+            // recommandations
+            const recommendationsList = document.getElementById('recommendationsList');
+            recommendationsList.innerHTML = '';
+            
+            accessibility.recommendations.forEach(rec => {
+                const li = document.createElement('li');
+                li.textContent = rec;
+                recommendationsList.appendChild(li);
+            });
+            
+            // afficher resultats
+            results.style.display = 'block';
+            results.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

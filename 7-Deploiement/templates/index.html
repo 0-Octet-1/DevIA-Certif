@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>yolov8 accessibility detection - technical demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Courier New', monospace; 
+            background: #fff; 
+            color: #000; 
+            font-size: 12px;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container { 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column;
+        }
+        .header { 
+            padding: 10px 20px; 
+            border-bottom: 1px solid #000; 
+            background: #f8f8f8;
+        }
+        .header h1 { 
+            font-size: 14px; 
+            font-weight: normal; 
+        }
+        .main-content { 
+            flex: 1;
+            display: flex;
+            height: calc(100vh - 50px);
+        }
+        .upload-section { 
+            width: 300px;
+            border-right: 1px solid #000;
+            padding: 15px;
+            background: #fafafa;
+        }
+        .results-section { 
+            flex: 1;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        .upload-area { 
+            border: 1px dashed #666; 
+            padding: 20px; 
+            text-align: center; 
+            cursor: pointer;
+            background: #fff;
+        }
+        .upload-area:hover { border-color: #000; }
+        .upload-area.dragover { border-color: #000; background: #f0f0f0; }
+        .detection-output { 
+            flex: 1;
+            display: flex;
+            gap: 15px;
+        }
+        .image-preview { 
+            width: 40%;
+        }
+        .image-preview img { 
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #666;
+        }
+        .detection-data { 
+            flex: 1;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+        }
+        .tech-info { 
+            background: #f5f5f5;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+        }
+        .detection-list { 
+            background: #fff;
+            border: 1px solid #000;
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+        }
+        .detection-item { 
+            padding: 3px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 10px;
+        }
+        .detection-item:last-child { border-bottom: none; }
+        .loading { text-align: center; padding: 20px; }
+        .error { color: #d00; background: #ffe; padding: 10px; border: 1px solid #fcc; }
+        input[type="file"] { display: none; }
+        .btn { background: #333; color: white; border: none; padding: 8px 16px; cursor: pointer; font-family: inherit; font-size: 12px; }
+        .btn:hover { background: #555; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>yolov8 accessibility detection - technical demo</h1>
+        </div>
+        
+        <div class="main-content">
+            <div class="upload-section">
+                <h3>input</h3>
+                <div class="upload-area" id="uploadArea">
+                    <p>drop image or click</p>
+                    <input type="file" id="fileInput" accept="image/*">
+                </div>
+            </div>
+            
+            <div class="results-section">
+                <div id="results">
+                    <p>no detection - upload image first</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const results = document.getElementById('results');
+
+        // drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                showError('fichier doit etre une image');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            results.innerHTML = '<div class="loading">analyse en cours...</div>';
+
+            fetch('/detect', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    showResults(data);
+                }
+            })
+            .catch(error => {
+                showError('erreur: ' + error.message);
+            });
+        }
+
+        function showError(message) {
+            results.innerHTML = `<div class="error">${message}</div>`;
+        }
+
+        function showResults(data) {
+            const html = `
+                <div class="detection-output">
+                    <div class="image-preview">
+                        <img src="data:image/jpeg;base64,${data.image_with_detections}" alt="detections">
+                    </div>
+                    <div class="detection-data">
+                        <div class="tech-info">
+                            model: yolov8 | time: ${data.inference_time}ms | detections: ${data.analysis.elements_detectes.length}
+                        </div>
+                        
+                        <div class="detection-list">
+                            <strong>raw detections:</strong><br>
+                            ${data.analysis.elements_detectes.map((det, i) => 
+                                `${i+1}. class=${det.type} conf=${det.confiance.toFixed(3)} bbox=[${det.position.map(p => p.toFixed(1)).join(',')}]${det.corrige ? ' [CORRECTED]' : ''}`
+                            ).join('<br>')}
+                            
+                            <br><br><strong>statistics:</strong><br>
+                            ${Object.entries(data.analysis.statistiques).map(([k,v]) => `${k}: ${v}`).join(' | ')}
+                            
+                            <br><br><strong>accessibility score:</strong> ${data.analysis.score_accessibilite} (${data.analysis.niveau})
+                            
+                            ${data.analysis.corrections_appliquees.length > 0 ? 
+                                `<br><br><strong>corrections applied:</strong><br>${data.analysis.corrections_appliquees.map(c => `${c.original} → ${c.corrige} (${c.raison})`).join('<br>')}` : 
+                                ''
+                            }
+                            
+                            <br><br><strong>recommendations:</strong><br>
+                            ${data.analysis.recommandations.join('<br>')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            results.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
+</html>
